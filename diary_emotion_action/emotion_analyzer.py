@@ -1,17 +1,20 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+import warnings
 
 from .models import Emotion, EmotionAnalysis, WeightedEmotionResult
 
+# Suppress FutureWarnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class EmotionAnalyzer:
     def __init__(self, model_name: str = "circulus/koelectra-emotion-v1"):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         self.model.to(self.device)
 
         # Map model output indices to emotions
@@ -71,7 +74,7 @@ class EmotionAnalyzer:
         return EmotionAnalysis(emotion=emotion, confidence=confidence)
 
     def analyze_weighted(
-        self, entries: List[Dict[str, str | datetime]]
+        self, entries: List[Dict[str, Union[str, datetime]]]
     ) -> EmotionAnalysis:
         """
         Analyze emotions with time-based weighting

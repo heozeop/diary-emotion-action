@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from notion_client import AsyncClient
-
+import logging
 from .models import DiaryEntry
 
 
@@ -29,7 +29,7 @@ class NotionDiaryClient:
 
         entries = []
         for page in response["results"]:
-            content = self._extract_content(page)
+            content = await self._extract_content(page)
             date = self._extract_date(page)
             if content and date:
                 entries.append(
@@ -42,17 +42,22 @@ class NotionDiaryClient:
 
         return entries
 
-    def _extract_content(self, page: dict) -> Optional[str]:
+    async def _extract_content(self, page: dict) -> Optional[str]:
         """Extract content from Notion page"""
         try:
-            return page["properties"]["Content"]["rich_text"][0]["plain_text"]
+            response = await self.client.blocks.children.list(block_id=page["id"])
+            contents = []
+            for block in response["results"]:
+                if block["type"] == "paragraph":
+                    contents.append(block["paragraph"]["rich_text"][0]["plain_text"])
+            return "\n".join(contents)
         except (KeyError, IndexError):
             return None
 
     def _extract_date(self, page: dict) -> Optional[datetime]:
         """Extract date from Notion page"""
         try:
-            date_str = page["properties"]["Date"]["date"]["start"]
+            date_str = page["properties"]["작성일"]["date"]["start"]
             return datetime.fromisoformat(date_str)
         except (KeyError, ValueError):
             return None
