@@ -47,4 +47,9 @@ class GitHubStatusUpdater:
                 headers=headers,
             )
 
-        return response.status_code == 200
+        if response.status_code == 200:
+            print(f"Successfully updated status to: {status.message} with emoji: {status.emoji}, response: {response.text}")
+            return True
+        else:
+            print(f"Error: {response.status_code} - {response.text}")  # Log error details
+            return False
