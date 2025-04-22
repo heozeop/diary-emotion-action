@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "diary-emotion-action"
+version = "0.1.0"
+description = "Updates GitHub profile status based on emotions detected from Notion diary entries"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "notion_mood_2_git_status"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+notion-client = "2.0.0"
+transformers = "4.38.2"
+torch = "2.2.1"
+requests = "2.31.0"
+python-dotenv = "1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "8.0.0"
+black = "24.2.0"
+isort = "5.13.2"
+flake8 = "7.0.0"
+mypy = "1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 
