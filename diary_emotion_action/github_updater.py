@@ -1,4 +1,4 @@
-import requests
+import httpx
 from typing import Optional
 
 from .models import GitHubStatus
@@ -9,9 +9,9 @@ class GitHubStatusUpdater:
         self.token = token
         self.api_url = "https://api.github.com/graphql"
 
-    def update_status(self, status: GitHubStatus) -> bool:
+    async def update_status(self, status: GitHubStatus) -> bool:
         """
-        Update GitHub user status
+        Update GitHub user status asynchronously.
 
         Args:
             status: GitHubStatus containing emoji and message
@@ -40,10 +40,11 @@ class GitHubStatusUpdater:
             "Content-Type": "application/json",
         }
 
-        response = requests.post(
-            self.api_url,
-            json={"query": query, "variables": variables},
-            headers=headers,
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                self.api_url,
+                json={"query": query, "variables": variables},
+                headers=headers,
+            )
 
         return response.status_code == 200

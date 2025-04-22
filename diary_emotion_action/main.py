@@ -46,7 +46,12 @@ class DiaryEmotionAction:
 
         # Update GitHub status
         status = EMOTION_TO_STATUS[analysis.emotion]
-        return self.github_updater.update_status(status)
+        success = await self.github_updater.update_status(status)
+
+        if not success:
+            raise RuntimeError(f"Failed to update GitHub status to: {status.message} with emoji: {status.emoji}")
+
+        return success
 
 
 async def main():
@@ -69,10 +74,7 @@ async def main():
         entries_limit=10,  # Analyze last 10 entries
     )
 
-    success = await action.run()
-    if not success:
-        raise RuntimeError("Failed to update GitHub status")
-
+    await action.run()
 
 if __name__ == "__main__":
     asyncio.run(main())
