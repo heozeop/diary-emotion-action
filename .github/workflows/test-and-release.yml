@@ -18,15 +18,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+
+      - name: Load cached Poetry installation
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Load cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-python-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install Poetry
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
-          poetry config virtualenvs.create false
+          poetry config virtualenvs.in-project true  # .venv 디렉토리에 가상환경 생성
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: |
+          poetry install --no-interaction --with dev
 
       - name: Run tests
         run: poetry run pytest -v
@@ -35,9 +48,39 @@ jobs:
     needs: test  # test job이 성공해야 실행
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # main 브랜치 push일 때만
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Load cached Poetry installation
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: poetry-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Load cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-python-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install Poetry
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
 
       - name: Get version from pyproject.toml
         id: get_version
