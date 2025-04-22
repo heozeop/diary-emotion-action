@@ -47,7 +47,7 @@ class GitHubStatusUpdater:
                 headers=headers,
             )
 
-        if response.hasattr("errors"):
+        if response.json().get("errors"):
             return False
 
         return True
