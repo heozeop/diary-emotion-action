@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 import requests
 
-from notion_mood_2_git_status.github_updater import GitHubStatusUpdater
-from notion_mood_2_git_status.models import GitHubStatus
+from diary_emotion_action.github_updater import GitHubStatusUpdater
+from diary_emotion_action.models import GitHubStatus
 
 
 @pytest.fixture

@@ -1,0 +1,21 @@
+name: Update GitHub Status from Notion Diary
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+    name: Update GitHub Status
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Update Status based on Diary Emotions
+        uses: ./  # Uses the action in the root directory
+        with:
+          notion_token: ${{ secrets.NOTION_TOKEN }}
+          notion_database_id: ${{ secrets.NOTION_DATABASE_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          entries_limit: 10 

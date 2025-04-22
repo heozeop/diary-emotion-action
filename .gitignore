@@ -35,5 +35,11 @@ ENV/
 
 # Project specific
 .notion-token
-.github-token 
+.github-token
 poetry.lock
+
+# Docker
+.docker/
+
+# Pytype
+.pytype/

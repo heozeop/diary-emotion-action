@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
-from notion_client import Client
+from notion_client import AsyncClient
 
 from .models import DiaryEntry
 
 
 class NotionDiaryClient:
     def __init__(self, token: str, database_id: str):
-        self.client = Client(auth=token)
+        self.client = AsyncClient(auth=token)
         self.database_id = database_id
 
     async def get_recent_entries(self, limit: int = 5) -> List[DiaryEntry]:
@@ -21,7 +21,7 @@ class NotionDiaryClient:
         Returns:
             List of DiaryEntry objects sorted by date (newest first)
         """
-        response = self.client.databases.query(
+        response = await self.client.databases.query(
             database_id=self.database_id,
             sorts=[{"property": "Date", "direction": "descending"}],
             page_size=limit,

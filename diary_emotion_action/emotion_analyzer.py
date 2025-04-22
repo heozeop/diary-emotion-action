@@ -42,11 +42,11 @@ class EmotionAnalyzer:
         days_diff = (latest_date - entry_date).days
         # Ensure days_diff is non-negative
         days_diff = max(0, days_diff)
-        
+
         # Calculate weight with 0.15 decay per day, minimum 0.1
         decay_rate = 0.15
         weight = max(0.1, 1.0 - (days_diff * decay_rate))
-        
+
         return weight
 
     def analyze_single(self, text: str) -> EmotionAnalysis:

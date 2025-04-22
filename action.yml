@@ -1,0 +1,38 @@
+name: 'Diary Emotion Status'
+description: 'Updates GitHub status based on emotions detected from Notion diary entries'
+author: 'heozeop'
+
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  notion_token:
+    description: 'Notion API integration token'
+    required: true
+  notion_database_id:
+    description: 'Notion diary database ID'
+    required: true
+  github_token:
+    description: 'GitHub token with user scope'
+    required: true
+  entries_limit:
+    description: 'Number of recent diary entries to analyze'
+    required: false
+    default: '10'
+  model_name:
+    description: 'Emotion analysis model name'
+    required: false
+    default: 'circulus/koelectra-emotion-v1'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    NOTION_TOKEN: ${{ inputs.notion_token }}
+    NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
+    GITHUB_TOKEN: ${{ inputs.github_token }}
+    ENTRIES_LIMIT: ${{ inputs.entries_limit }}
+    MODEL_NAME: ${{ inputs.model_name }}
+    PYTHONPATH: /app
+    NUMPY_EXPERIMENTAL_ARRAY_FUNCTION: 0  # NumPy 2.x 호환성을 위한 설정

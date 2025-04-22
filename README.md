@@ -1,79 +1,64 @@
-# 일기 감정 분석 GitHub 상태 업데이트
+# Diary Emotion GitHub Status Action
 
-Notion 일기의 감정을 분석하여 GitHub 프로필 상태를 자동으로 업데이트합니다.
+Notion 일기의 감정을 분석하여 GitHub 프로필 상태를 자동으로 업데이트하는 GitHub Action입니다.
 
 ## 주요 기능
 
-- Notion 일기 최근 10개 항목 조회
-- KoELECTRA 감정 분석 모델을 사용한 텍스트 감정 분석
-  - 7가지 감정 분류: 기쁨, 슬픔, 분노, 두려움, 놀람, 혐오, 중립
-  - 최근 일기에 더 높은 가중치 부여 (시간 기반 가중치 시스템)
-- 분석된 감정에 따른 GitHub 프로필 상태 자동 업데이트
-  - 이모지와 상태 메시지 설정
-  - 전반적인 감정 상태 반영
-- GitHub Actions를 통한 자동 실행
+- Notion 일기 최근 10개 항목의 감정 분석
+- 시간 기반 가중치가 적용된 감정 분석
+- GitHub 프로필 상태 자동 업데이트
 
-## 설치 방법
+## 사용 방법
 
-1. Poetry 설치 (파이썬 패키지 관리자)
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
+1. GitHub 저장소에 시크릿 설정:
+   - `NOTION_TOKEN`
+   - `NOTION_DATABASE_ID`
+   - `GITHUB_TOKEN`
 
-2. 저장소 복제
-   ```bash
-   git clone https://github.com/your-username/diary-emotion-action.git
-   cd diary-emotion-action
-   ```
+2. 워크플로우 파일 생성 (`.github/workflows/update-status.yml`):
 
-3. 의존성 설치
-   ```bash
-   poetry install
-   ```
+```yaml
+name: Update GitHub Status
 
-## 환경 설정
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 6시간마다 실행
+  workflow_dispatch:        # 수동 실행 가능
 
-1. GitHub 저장소에 필요한 시크릿 설정:
-   - `NOTION_TOKEN`: Notion API 통합 토큰
-     - [Notion API 설정 페이지](https://www.notion.so/my-integrations)에서 생성
-   - `NOTION_DATABASE_ID`: Notion 일기 데이터베이스 ID
-     - 데이터베이스 URL에서 추출 가능
-     - 예: `https://notion.so/workspace/{DATABASE_ID}?v=...`
-   - `GITHUB_TOKEN`: GitHub 개인 접근 토큰
-     - [GitHub 토큰 설정](https://github.com/settings/tokens)에서 생성
-     - 필요한 권한: `user` 스코프 (프로필 상태 업데이트용)
-
-2. Notion 데이터베이스 요구사항:
-   - 필수 속성:
-     - `Content`: 일기 내용 (텍스트)
-     - `Date`: 작성일 (날짜)
-
-3. GitHub Actions 워크플로우 설정:
-   - `.github/workflows/sentiment-status.yml` 파일에서 실행 주기 설정
-   - 기본값: 00시 실행
-
-## 개발 환경 설정
-
-```bash
-# 가상 환경 활성화
-poetry env activate
-
-# 테스트 실행
-poetry run pytest
-
-# 코드 포맷팅
-poetry run black .
-poetry run isort .
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Status
+        uses: your-username/diary-emotion-action@v1
+        with:
+          notion_token: ${{ secrets.NOTION_TOKEN }}
+          notion_database_id: ${{ secrets.NOTION_DATABASE_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+## 입력 파라미터
+
+| 파라미터 | 필수 | 기본값 | 설명 |
+|----------|------|--------|------|
+| `notion_token` | ✅ | - | Notion API 통합 토큰 |
+| `notion_database_id` | ✅ | - | Notion 일기 데이터베이스 ID |
+| `github_token` | ✅ | - | GitHub 토큰 (user 스코프 필요) |
+| `entries_limit` | ❌ | 10 | 분석할 최근 일기 수 |
+| `model_name` | ❌ | circulus/koelectra-emotion-v1 | 감정 분석 모델 이름 |
+
+## Notion 데이터베이스 요구사항
+
+필수 속성:
+- `Content`: 일기 내용 (텍스트)
+- `Date`: 작성일 (날짜)
 
 ## 감정 분석 시스템
 
-- 최근 10개 일기 항목 분석
-- 시간 기반 가중치 적용:
+- 시간 기반 가중치:
   - 오늘 작성: 1.0
   - 하루 지날 때마다 0.15씩 감소
   - 최소 가중치: 0.1
-- 각 일기의 감정 분석 결과와 가중치를 종합하여 최종 감정 상태 결정
 
 ## 상태 메시지 예시
 
@@ -84,6 +69,23 @@ poetry run isort .
 - 😲 "Life's been full of surprises!"
 - 🤢 "Need a change of pace"
 - 😐 "Keeping it steady"
+
+## 개발하기
+
+1. 저장소 복제
+```bash
+git clone https://github.com/your-username/diary-emotion-action.git
+```
+
+2. 의존성 설치
+```bash
+poetry install
+```
+
+3. 테스트 실행
+```bash
+poetry run pytest
+```
 
 ## 라이선스
 
