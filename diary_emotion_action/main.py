@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import List, Optional
 
@@ -48,7 +49,7 @@ class DiaryEmotionAction:
         return self.github_updater.update_status(status)
 
 
-def main():
+async def main():
     load_dotenv()
 
     required_env_vars = [
@@ -68,10 +69,10 @@ def main():
         entries_limit=10,  # Analyze last 10 entries
     )
 
-    success = action.run()
+    success = await action.run()
     if not success:
         raise RuntimeError("Failed to update GitHub status")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

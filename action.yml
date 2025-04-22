@@ -1,6 +1,6 @@
 name: 'Diary Emotion Status'
 description: 'Updates GitHub status based on emotions detected from Notion diary entries'
-author: 'heozeop'
+author: 'your-github-username'
 
 branding:
   icon: 'book-open'
@@ -26,13 +26,29 @@ inputs:
     default: 'circulus/koelectra-emotion-v1'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  env:
-    NOTION_TOKEN: ${{ inputs.notion_token }}
-    NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
-    GITHUB_TOKEN: ${{ inputs.github_token }}
-    ENTRIES_LIMIT: ${{ inputs.entries_limit }}
-    MODEL_NAME: ${{ inputs.model_name }}
-    PYTHONPATH: /app
-    NUMPY_EXPERIMENTAL_ARRAY_FUNCTION: 0  # NumPy 2.x 호환성을 위한 설정
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install Poetry
+      shell: bash
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.create false
+
+    - name: Install dependencies
+      shell: bash
+      run: poetry install --no-interaction --no-root
+
+    - name: Update GitHub Status
+      shell: bash
+      env:
+        NOTION_TOKEN: ${{ inputs.notion_token }}
+        NOTION_DATABASE_ID: ${{ inputs.notion_database_id }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        ENTRIES_LIMIT: ${{ inputs.entries_limit }}
+        MODEL_NAME: ${{ inputs.model_name }}
+      run: poetry run python -c "import asyncio; from diary_emotion_action.main import main; asyncio.run(main())"
